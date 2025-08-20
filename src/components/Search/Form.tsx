@@ -73,7 +73,7 @@ const Form: Component<{
 
       <div class="field has-addons">
         <div class="control">
-          <label class="button is-fullwidth is-small is-shadowless">
+          <label class="button is-small is-shadowless">
             <input
               type="checkbox"
               checked={props.store.titleSearch}
@@ -84,7 +84,7 @@ const Form: Component<{
         </div>
 
         <div class="control">
-          <label class="button is-fullwidth is-small is-shadowless">
+          <label class="button is-small is-shadowless">
             <input
               type="checkbox"
               checked={props.store.descrSearch}
