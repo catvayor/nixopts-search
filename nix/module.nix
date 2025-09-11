@@ -132,12 +132,11 @@ let
     pkgs.runCommand "options-${module}"
       {
         fileName = sanitizeDerivationName "${module}.json";
-        nativeBuildInputs =
-          [
-            (pkgs.python3.withPackages (ps: [ ps.markdown ]))
-          ]
-          ++ (optional cfg.compression.brotli.enable pkgs.brotli)
-          ++ (optional cfg.compression.gzip.enable pkgs.gzip);
+        nativeBuildInputs = [
+          (pkgs.python3.withPackages (ps: [ ps.markdown ]))
+        ]
+        ++ (optional cfg.compression.brotli.enable pkgs.brotli)
+        ++ (optional cfg.compression.gzip.enable pkgs.gzip);
 
         passAsFile = [ "result" ];
         result = builtins.toJSON (
@@ -334,49 +333,48 @@ in
 
   config = mkIf cfg.enable {
     services = {
-      nginx =
-        {
-          enable = true;
-          virtualHosts.${cfg.host} = {
+      nginx = {
+        enable = true;
+        virtualHosts.${cfg.host} = {
 
-            root = pkgs.symlinkJoin {
-              name = "nixopts-with-data";
-              paths = [
-                # Base website
-                (pkgs.callPackage ./package.nix { })
+          root = pkgs.symlinkJoin {
+            name = "nixopts-with-data";
+            paths = [
+              # Base website
+              (pkgs.callPackage ./package.nix { })
 
-                # Additional data
-                (pkgs.linkFarm "nixopts-data" {
-                  "meta.json" = (pkgs.formats.json { }).generate "meta.json" {
-                    inherit (cfg) defaultSet;
+              # Additional data
+              (pkgs.linkFarm "nixopts-data" {
+                "meta.json" = (pkgs.formats.json { }).generate "meta.json" {
+                  inherit (cfg) defaultSet;
 
-                    links = mapAttrsToList (name: href: { inherit name href; }) cfg.links;
+                  links = mapAttrsToList (name: href: { inherit name href; }) cfg.links;
 
-                    modules = mapAttrs (
-                      name:
-                      { title, ... }:
-                      {
-                        inherit title;
-                        path = "data/${sanitizeDerivationName "${name}.json"}";
-                      }
-                    ) cfg.modules;
-                  };
+                  modules = mapAttrs (
+                    name:
+                    { title, ... }:
+                    {
+                      inherit title;
+                      path = "data/${sanitizeDerivationName "${name}.json"}";
+                    }
+                  ) cfg.modules;
+                };
 
-                  data = pkgs.symlinkJoin {
-                    name = "options-data";
-                    paths = mapAttrsToList mkDocJSON cfg.modules;
-                  };
-                })
-              ];
-            };
-
-            locations."/" = {
-              tryFiles = "$uri /index.html";
-            };
+                data = pkgs.symlinkJoin {
+                  name = "options-data";
+                  paths = mapAttrsToList mkDocJSON cfg.modules;
+                };
+              })
+            ];
           };
-        }
-        // (optionalAttrs cfg.compression.brotli.enable { recommendedBrotliSettings = mkDefault true; })
-        // (optionalAttrs cfg.compression.gzip.enable { recommendedGzipSettings = mkDefault true; });
+
+          locations."/" = {
+            tryFiles = "$uri /index.html";
+          };
+        };
+      }
+      // (optionalAttrs cfg.compression.brotli.enable { recommendedBrotliSettings = mkDefault true; })
+      // (optionalAttrs cfg.compression.gzip.enable { recommendedGzipSettings = mkDefault true; });
     };
 
     assertions = [
