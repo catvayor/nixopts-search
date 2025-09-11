@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Tom Hubrecht <tom.hubrecht@dgnum.eu>
+# SPDX-FileCopyrightText: 2024 Lubin Bailly <lubin.bailly@dgnum.eu>
 #
 # SPDX-License-Identifier: EUPL-1.2
 
