@@ -152,36 +152,34 @@ let
               declarations,
               ...
             }:
-            if (description == null) then
-              (throw "${title} has no description")
-            else
-              let
-                warnOnContext =
-                  kind: text:
-                  if (builtins.hasContext text) then
-                    warn "Context found in the '${kind}' field of the ${title} option of ${module}: \n${text}" (
-                      builtins.unsafeDiscardStringContext text
-                    )
-                  else
-                    text;
-              in
-              {
-                inherit
-                  description
-                  readOnly
-                  type
-                  ;
+            let
+              warnOnContext =
+                kind: text:
+                if (builtins.hasContext text) then
+                  warn "Context found in the '${kind}' field of the ${title} option of ${module}: \n${text}" (
+                    builtins.unsafeDiscardStringContext text
+                  )
+                else
+                  text;
+            in
+            {
+              inherit
+                readOnly
+                type
+                ;
+              description =
+                if description == null then warn "${title} has no description" "Not documented" else description;
 
-                # Sanitize
-                title = escapeXML title;
-                declarations = builtins.map mkTranslation declarations;
-              }
-              // (optionalAttrs (default != null) {
-                default = warnOnContext "default" default.text;
-              })
-              // (optionalAttrs (example != null) {
-                example = warnOnContext "example" example.text;
-              })
+              # Sanitize
+              title = escapeXML title;
+              declarations = builtins.map mkTranslation declarations;
+            }
+            // (optionalAttrs (default != null) {
+              default = warnOnContext "default" default.text;
+            })
+            // (optionalAttrs (example != null) {
+              example = warnOnContext "example" example.text;
+            })
           ) options
         );
       }
